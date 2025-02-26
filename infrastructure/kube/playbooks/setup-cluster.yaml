@@ -1,0 +1,153 @@
+---
+- name: Setup control planes
+  hosts: control_planes
+  become: true
+  tasks:
+      - name: Check if cluster is already initialized
+        ansible.builtin.stat:
+            path: /etc/kubernetes/admin.conf
+        register: cluster_initialized
+
+      - name: Initialize control plane
+        ansible.builtin.command: >
+            kubeadm init
+            --node-name {{ node_name }}
+            --control-plane-endpoint={{ control_plane_endpoint }}:{{ control_plane_endpoint_port }}
+            --pod-network-cidr={{ pod_cidr_range }}
+            --service-cidr={{ cni_cidr_range }}
+            --skip-phases=addon/kube-proxy
+        when: inventory_hostname == groups['control_planes'][0] and not cluster_initialized.stat.exists
+        changed_when: false
+
+      - name: Generate join token
+        ansible.builtin.command: kubeadm token create --print-join-command
+        register: join_command
+        when: inventory_hostname == groups['control_planes'][0]
+        changed_when: false
+
+      - name: Create .kube directory for user
+        ansible.builtin.file:
+            path: "/home/{{ ansible_user }}/.kube"
+            state: directory
+            owner: "{{ ansible_user }}"
+            group: "{{ ansible_user }}"
+            mode: "0755"
+        when:
+            - inventory_hostname == groups['control_planes'][0]
+
+      - name: Copy kubeadm config to userfolder on remote
+        ansible.builtin.copy:
+            src: /etc/kubernetes/admin.conf
+            dest: "/home/{{ ansible_user }}/.kube/config"
+            owner: "{{ ansible_user }}"
+            group: "{{ ansible_user }}"
+            mode: "0644"
+            remote_src: true
+        become: true
+        when:
+            - inventory_hostname == groups['control_planes'][0]
+
+      - name: Copy kubeadm config to local user
+        ansible.builtin.fetch:
+            src: "/home/{{ ansible_user }}/.kube/config"
+            dest: "{{ lookup('env', 'HOME') }}/.kube/config"
+            flat: true
+            mode: "0644"
+            fail_on_missing: true
+        become: false
+        when:
+            - inventory_hostname == groups['control_planes'][0]
+
+- name: Join worker nodes
+  hosts: worker_nodes
+  become: true
+  tasks:
+      - name: Check if node is actually joined and ready in cluster
+        ansible.builtin.command: kubectl get nodes -o jsonpath='{.items[*].metadata.name}'
+        register: cluster_nodes
+        failed_when: false
+        changed_when: false
+        delegate_to: "{{ groups['control_planes'][0] }}"
+        environment:
+            KUBECONFIG: "/home/{{ ansible_user }}/.kube/config"
+
+      - name: Check if current node is in the cluster nodes list
+        ansible.builtin.set_fact:
+            node_in_cluster: "{{ (node_name in cluster_nodes.stdout.split()) if cluster_nodes.rc == 0 and cluster_nodes.stdout != '' else false }}"
+
+      - name: Join worker nodes to cluster
+        ansible.builtin.command: "{{ hostvars[groups['control_planes'][0]]['join_command']['stdout'] }} --node-name {{ node_name }}"
+        when: not (node_in_cluster | default(false))
+        changed_when: false
+
+- name: Install Cilium
+  hosts: control_planes[0]
+  become: true
+  tasks:
+      - name: check if cli is already installed
+        ansible.builtin.stat:
+            path: /usr/local/bin/cilium
+        register: cilium_cli
+
+      - name: check if cli is already downloaded
+        ansible.builtin.stat:
+            path: /tmp/cilium-linux-amd64.tar.gz
+        register: cilium_cli_downloaded
+
+      - name: "Download cli tool"
+        ansible.builtin.get_url:
+            url: "https://github.com/cilium/cilium-cli/releases/download/{{ cilium_cli_version }}/cilium-linux-amd64.tar.gz"
+            dest: "/tmp/cilium-linux-amd64.tar.gz"
+            mode: "0644"
+        when: not cilium_cli.stat.exists and not cilium_cli_downloaded.stat.exists
+
+      - name: extract cli tool
+        ansible.builtin.unarchive:
+            src: "/tmp/cilium-linux-amd64.tar.gz"
+            dest: "/usr/local/bin"
+            remote_src: true
+            mode: "0755"
+        when: not cilium_cli.stat.exists
+
+      - name: check if cilium is already installed
+        ansible.builtin.command: kubectl get pods -n kube-system -l k8s-app=cilium
+        register: cilium_status
+        failed_when: false
+        changed_when: false
+        environment:
+            KUBECONFIG: "/home/{{ ansible_user }}/.kube/config"
+
+      - name: Check if cilium pods exist
+        ansible.builtin.set_fact:
+            cilium_installed: "{{ cilium_status.stdout_lines | length > 0 }}"
+
+      - name: install cilium CNI
+        ansible.builtin.command: >
+            cilium install
+            --version {{ cilium_version }}
+            --set kubeProxyReplacement=true
+            --set k8sServiceHost={{ control_plane_endpoint }}
+            --set k8sServicePort={{ control_plane_endpoint_port }}
+            --set ingressController.enabled=true
+            --set ingressController.loadbalancerMode=shared
+            --set ingressController.service.type=NodePort
+            --set ingressController.service.labels.lb-ipam=main-pool
+            --set ingressController.service.insecureNodePort=30080
+            --set ingressController.service.secureNodePort=30443
+            --set ipam.mode=cluster-pool
+            --set ipam.operator.clusterPoolIPv4PodCIDRList={{ pod_cidr_range }}
+            --set l2announcements.enabled=true
+        when: not cilium_installed
+        changed_when: false
+        environment:
+            KUBECONFIG: "/home/{{ ansible_user }}/.kube/config"
+
+      - name: Wait for Cilium to be ready
+        ansible.builtin.command: cilium status --wait --wait-duration=10m
+        environment:
+            KUBECONFIG: "/home/{{ ansible_user }}/.kube/config"
+        when: not cilium_installed
+        register: cilium_status
+        retries: 3
+        delay: 30
+        changed_when: false

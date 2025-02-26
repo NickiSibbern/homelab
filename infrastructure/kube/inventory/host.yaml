@@ -1,0 +1,21 @@
+all:
+  children:
+    control_planes:
+      hosts:
+        control_plane_01:
+          node_name: control-plane-01
+          ansible_host: 10.0.1.110
+          ansible_user: homelab
+          ansible_ssh_private_key_file: ~/.ssh/homelab
+    worker_nodes:
+      hosts:
+        worker_node_01:
+          node_name: worker-node-01
+          ansible_host: 10.0.1.120
+          ansible_user: homelab
+          ansible_ssh_private_key_file: ~/.ssh/homelab
+        worker_node_02:
+          node_name: worker-node-02
+          ansible_host: 10.0.1.121
+          ansible_user: homelab
+          ansible_ssh_private_key_file: ~/.ssh/homelab

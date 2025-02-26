@@ -1,0 +1,14 @@
+---
+- name: Reset Kubernetes cluster
+  hosts: all
+  become: true
+  tasks:
+    - name: Reset kubeadm
+      ansible.builtin.command: kubeadm reset -f
+      register: reset_output
+
+    - name: Reboot the node
+      ansible.builtin.reboot:
+        msg: "Rebooting after kubeadm reset"
+        connect_timeout: 5
+        reboot_timeout: 300

@@ -1,0 +1,9 @@
+---
+# Kubernetes
+control_plane_endpoint: "kube.nickisibbern.dk"
+control_plane_endpoint_port: 6443
+pod_cidr_range: 172.16.0.0/16
+cni_cidr_range: 10.96.0.0/12
+cilium_cli_version: "v0.18.6"
+cilium_version: "1.18.1"
+hubble_cli_version: "v1.17.5"
