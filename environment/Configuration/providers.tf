@@ -4,7 +4,28 @@ terraform {
       source  = "hashicorp/kubernetes"
       version = ">= 1.0.0"
     }
+    helm = {
+      source = "hashicorp/helm"
+      version = ">=3.0.0"
+    }
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = ">= 4.0.0"
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = ">= 0.10.0"
+    }
+    null = {
+      source  = "hashicorp/null"
+      version = ">= 3.0.0"
+    }
+    kubectl = {
+      source  = "gavinbunney/kubectl"
+      version = ">= 1.19.0"
+    }
   }
+
   backend "azurerm" {
     resource_group_name  = "homelab"
     storage_account_name = "sahomelabnickisibbern"
@@ -15,4 +36,14 @@ terraform {
 
 provider "kubernetes" {
   config_path = "~/.kube/config"
+}
+
+provider "helm" {
+  kubernetes = {
+    config_path = "~/.kube/config"
+  }
+}
+
+provider "azurerm" {
+  features {}
 }

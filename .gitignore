@@ -48,5 +48,3 @@ terraform.rc
 # .vscode
 .vscode/
 
-# ignore secrets
-secrets.json

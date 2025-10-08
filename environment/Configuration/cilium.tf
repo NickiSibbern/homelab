@@ -1,35 +1,49 @@
-resource "kubernetes_manifest" "cilium_lb_pool" {
-  manifest = {
-    "apiVersion" = "cilium.io/v2"
-    "kind"       = "CiliumLoadBalancerIPPool"
-    "metadata" = {
-      "name" = "main-pool"
-    }
-    "spec" = {
-      "blocks" : [
-        {
-          "cidr" = "10.0.2.0/24" # This will be the external ip range for the load balancer
-        }
-      ]
-      serviceSelector = {
-        "matchLabels" = {
-          "lb-pool" = "main-pool"
-        }
-      }
-    }
-  }
+
+locals {
+  customcrds = [
+    "https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.2.0/config/crd/standard/gateway.networking.k8s.io_gatewayclasses.yaml",
+    "https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.2.0/config/crd/standard/gateway.networking.k8s.io_gateways.yaml",
+    "https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.2.0/config/crd/standard/gateway.networking.k8s.io_httproutes.yaml",
+    "https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.2.0/config/crd/standard/gateway.networking.k8s.io_referencegrants.yaml",
+    "https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.2.0/config/crd/standard/gateway.networking.k8s.io_grpcroutes.yaml",
+    "https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.2.0/config/crd/experimental/gateway.networking.k8s.io_tlsroutes.yaml"
+  ]
 }
 
-resource "kubernetes_manifest" "cilium_l2_announcement" {
-  manifest = {
-    "apiVersion" = "cilium.io/v2alpha1"
-    "kind"       = "CiliumL2AnnouncementPolicy"
-    "metadata" = {
-      "name" = "main-pool-l2-announcement"
-    }
-    "spec" = {
-      "externalIPs"     = true
-      "loadBalancerIPs" = true
-    }
-  }
+data "http" "crd_yaml" {
+  for_each = toset(local.customcrds)
+  url      = each.value
+}
+
+resource "kubectl_manifest" "cilium_custom_resources" {
+  for_each = toset(local.customcrds)
+
+  yaml_body = data.http.crd_yaml[each.value].response_body
+}
+
+resource "helm_release" "cilium" {
+  depends_on = [kubectl_manifest.cilium_custom_resources]
+
+  name             = "cilium"
+  repository       = "https://helm.cilium.io/"
+  chart            = "cilium"
+  namespace        = "kube-system"
+  version          = "1.18.2"
+  cleanup_on_fail  = true
+  wait             = true
+  wait_for_jobs    = true
+  timeout          = 200
+  values           = [file("./components/cilium/cilium-values.yaml")]
+}
+
+resource "kubectl_manifest" "CiliumL2AnnouncementPolicy" {
+  depends_on = [helm_release.cilium]
+
+  yaml_body = templatefile("./components/cilium/cilium-l2-announcement.yaml", {})
+}
+
+resource "kubectl_manifest" "CiliumLoadBalancerIPPool" {
+  depends_on = [ helm_release.cilium ]
+
+  yaml_body = templatefile("./components/cilium/cilium-lb-pool.yaml", {})
 }
