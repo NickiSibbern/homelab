@@ -13,7 +13,7 @@ I created this repo in order to play around with kubeadm and various forms of ma
 - az cli
 - proxmox (configured and ready to be used with api token)
 
-## Prepare terraform
+## Prepare opentofu
 
 1. make sure you are authorized with the azure cli, and set the `ARM_SUBSCRIPTION_ID` and `ARM_TENANT_ID` as variables in `.envc.rc` file
 2. go to [./infrastructure/init/state/](./infrastructure/init/state/) and do
@@ -51,7 +51,7 @@ in order to initialize the keyvault with all the keys from secret.json
 1. go to [./infrastructure/proxmox/](./infrastructure/virtual-machines/) and execute:
 
 ```sh
-terraform init -var-file=../../environment/dev.tfvars && terraform plan -var-file=../../environment/dev.tfvars
+opentofu init -var-file=../../environment/dev.tfvars && opentofu plan -var-file=../../environment/dev.tfvars
 ```
 
 this should setup all the proxmox virual machines configured for a cluster
@@ -69,6 +69,6 @@ It will also copy the kube config into your `~/.kube` folder
 
 ## Cluster configuration
 
-all cluster configuration is done in the [./environment/](./environment/) via primarily terraform.
+all cluster configuration is done in the [./environment/](./environment/) via primarily opentofu.
 
 > use the vars file in the environment folder
