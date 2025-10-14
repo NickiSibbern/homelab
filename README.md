@@ -27,7 +27,7 @@ tofu apply -var-file ../../../environment/dev.tfvars
 
 ```json
 {
-  "cloudflare-api-key": ",
+  "cloudflare-api-key": "",
   "email": "",
   "proxmox-api-key": "",
   "proxmox-password": "",
