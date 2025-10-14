@@ -6,20 +6,15 @@
 - terraform
 - direnv
 - az cli
-
-## notes
-When creating secret files for eg. the keyvault, in order to not accedently commit them you but still want the file tracked as code is depending on it, do the following:
-``` sh
-git update-index --assume-unchanged <path-to-file>
-```
-
+- proxmox (configured and ready to be used with api token)
 
 ## Prepare terraform
 
 1) make sure you are authorized with the azure cli, and set the `ARM_SUBSCRIPTION_ID` and `ARM_TENANT_ID` as variables in `.envc.rc` file
 2) go to [./infrastructure/init/state/](./infrastructure/init/state/) and do
 ``` sh
-terraform init && terraform apply
+tofu init -var-file ../../../environment/dev.tfvars &&
+tofu apply -var-file ../../../environment/dev.tfvars
 ```
 
 
@@ -37,7 +32,8 @@ terraform init && terraform apply
 ```
 then execute:
  ``` sh
-terraform init && terraform apply
+ tofu init -var-file ../../../environment/dev.tfvars &&
+ tofu apply -var-file ../../../environment/dev.tfvar
 ```
 in order to initialize the keyvault with all the keys from secret.json
 
@@ -45,7 +41,7 @@ in order to initialize the keyvault with all the keys from secret.json
 
 1) go to [./infrastructure/proxmox/](./infrastructure/virtual-machines/) and execute:
 ``` sh
-terraform init && terraform apply -var-file=dev.tfvars
+terraform init -var-file=../../environment/dev.tfvars && terraform plan -var-file=../../environment/dev.tfvars
 ```
 this should setup all the proxmox virual machines configured for a cluster
 
@@ -59,4 +55,5 @@ It will also copy the kube config into your `~/.kube` folder
 
 
 ## Cluster configuration
-all cluster configuration is done in the [./environment/](./environment/) via primarily terraform
+all cluster configuration is done in the [./environment/](./environment/) via primarily terraform.
+> use the vars file in the environment folder

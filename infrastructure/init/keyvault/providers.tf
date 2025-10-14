@@ -6,8 +6,8 @@ terraform {
     }
   }
   backend "azurerm" {
-    resource_group_name  = "homelab"
-    storage_account_name = "sahomelabnickisibbern"
+    resource_group_name  = var.azure_resource_group_name
+    storage_account_name = var.azure_storage_account_name
     container_name       = "tfstate"
     key                  = "keyvault-terraform.tfstate"
   }

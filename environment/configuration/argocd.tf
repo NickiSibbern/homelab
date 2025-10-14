@@ -2,6 +2,8 @@ locals {
   helmvalues = templatefile("./components/argocd/argocd-values.yaml", {
     github_token               = data.azurerm_key_vault_secret.argo_github_token.value
     argocd_admin_password_hash = data.azurerm_key_vault_secret.argocd_password.value
+    host_url                  = "argocd.${var.domain}"
+    github_organization       = var.github_organization
   })
 }
 
@@ -31,6 +33,6 @@ resource "kubectl_manifest" "app-root" {
   depends_on = [ helm_release.argocd ]
 
   yaml_body = templatefile("./components/argocd/app-root.yaml", {
-
+    argo_state_repo = var.argo_state_repo
   })
 }

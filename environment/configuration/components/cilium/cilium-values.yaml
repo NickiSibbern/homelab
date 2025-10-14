@@ -5,7 +5,7 @@ gatewayAPI:
 kubeProxyReplacement: true
 l2announcements:
   enabled: true
-k8sServiceHost: kube.nickisibbern.dk
+k8sServiceHost: "${kubernetes_hostname}"
 k8sServicePort: 6443
 ipam:
   operator:

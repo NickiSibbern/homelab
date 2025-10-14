@@ -4,7 +4,7 @@ metadata:
   name: app-root
   namespace: argocd
   finalizers:
-  - resources-finalizer.argocd.argoproj.io
+    - resources-finalizer.argocd.argoproj.io
 spec:
   destination:
     name: "in-cluster"
@@ -12,7 +12,7 @@ spec:
   project: default
   source:
     path: application-manifests
-    repoURL: https://github.com/nickisibbern/homelab-state
+    repoURL: ${argo_state_repo}
     targetRevision: main
   syncPolicy:
     automated:

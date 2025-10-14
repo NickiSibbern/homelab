@@ -1,5 +1,5 @@
 global:
-  domain: argocd.nickisibbern.dk
+  domain: ${host_url}
 
 server:
   httproute:
@@ -9,7 +9,7 @@ server:
         namespace: default
         sectionName: https
     hostnames:
-      - argocd.nickisibbern.dk
+      - ${host_url}
     rules:
       - matches:
         - path:
@@ -22,12 +22,11 @@ server:
 configs:
   secret:
     argocdServerAdminPassword: "${argocd_admin_password_hash}"
-    # githubSecret: "${github_token}"
   params:
     server.insecure: "true"
   credentialTemplates:
     https-creds:
-      url: "https://github.com/nickisibbern"
+      url: "https://github.com/${github_organization}"
       username: "x-user"
       password: "${github_token}"
 

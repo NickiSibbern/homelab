@@ -1,5 +1,5 @@
 resource "azurerm_storage_account" "tfstate" {
-  name                     = "sahomelabnickisibbern"
+  name                     = var.azure_storage_account_name
   resource_group_name      = azurerm_resource_group.homelab.name
   location                 = azurerm_resource_group.homelab.location
   account_tier             = "Standard"

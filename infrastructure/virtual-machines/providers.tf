@@ -9,10 +9,10 @@ terraform {
     }
   }
   backend "azurerm" {
-    resource_group_name  = "homelab"
-    storage_account_name = "sahomelabnickisibbern"
+    resource_group_name  = var.azure_resource_group_name
+    storage_account_name = var.azure_storage_account_name
     container_name       = "tfstate"
-    key                  = "terraform.tfstate"
+    key                  = "vm-terraform.tfstate"
   }
 }
 
@@ -27,7 +27,7 @@ provider "proxmox" {
 
   ssh {
     agent    = true
-    username = "homelab"
+    username = data.azurerm_key_vault_secret.proxmox_username.value
     password = data.azurerm_key_vault_secret.proxmox_password.value
   }
 }

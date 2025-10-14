@@ -19,4 +19,4 @@ spec:
               key: api-token
         selector:
           dnsZones:
-            - "nickisibbern.dk"
+            - "${domain}"

@@ -1,9 +1,9 @@
 data "azurerm_resource_group" "homelab" {
-  name     = "homelab"
+  name     = var.azure_resource_group_name
 }
 
 data "azurerm_key_vault" "homelab" {
-  name                = "kv-homelab-nickisibbern"
+  name                = var.azure_keyvault_name
   resource_group_name = data.azurerm_resource_group.homelab.name
 }
 

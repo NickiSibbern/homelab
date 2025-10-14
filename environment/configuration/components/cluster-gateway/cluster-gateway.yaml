@@ -11,7 +11,7 @@ spec:
   - name: https
     protocol: HTTPS
     port: 443
-    hostname: "*.nickisibbern.dk"
+    hostname: "*.${domain}"
     tls:
       certificateRefs:
       - kind: Secret

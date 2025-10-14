@@ -1,10 +1,10 @@
 data "azurerm_client_config" "current" {}
 data "azurerm_resource_group" "homelab" {
-    name     = "homelab"
+    name     = var.azure_resource_group_name
 }
 
 resource "azurerm_key_vault" "homelab" {
-  name                        = "kv-homelab-nickisibbern"
+  name                        = var.azure_keyvault_name
   location                    = data.azurerm_resource_group.homelab.location
   resource_group_name         = data.azurerm_resource_group.homelab.name
   enabled_for_disk_encryption = true

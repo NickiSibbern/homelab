@@ -43,20 +43,22 @@ systemctl enable --now kubelet
 EOF
 }
 
-module "control-plane-01" {
+module "control-planes" {
   source = "./modules/pve-ubuntu-vm"
 
-  name                 = "control-plane-01"
-  pve_node             = "lab01"
-  ssh_key_location     = pathexpand("~/.ssh/homelab.pub")
+  for_each = var.kubernetes_cluster_nodes["controlplanes"]
+
+  name                 = each.key
+  pve_node             = each.value.proxmox_node
+  ssh_key_location     = pathexpand(var.ssh_key_location)
   cpu                  = 4
-  memory               = 8112
+  memory               = 6144
   disk_size            = 100
-  ip                   = "10.0.1.110"
+  ip                   = each.value.ip
   default_gateway      = var.default_gateway
   subnet_mask          = var.subnet_mask
-  cloud_iso_name       = proxmox_virtual_environment_download_file.ubuntu_cloud_image["lab01"].id
-  user_name            = "homelab"
+  cloud_iso_name       = proxmox_virtual_environment_download_file.ubuntu_cloud_image[each.value.proxmox_node].id
+  user_name            = var.vm_username
   proxmox_endpoint     = var.proxmox_endpoint
   proxmox_api_key      = data.azurerm_key_vault_secret.proxmox_api_key.value
   proxmox_ssh_username = data.azurerm_key_vault_secret.proxmox_username.value
@@ -65,43 +67,22 @@ module "control-plane-01" {
   additional_runcmd    = local.base_runcmd
 }
 
-module "worker-node-01" {
+module "worker-nodes" {
   source = "./modules/pve-ubuntu-vm"
 
-  name                 = "worker-node-1"
-  pve_node             = "lab01"
-  ssh_key_location     = pathexpand("~/.ssh/homelab.pub")
+  for_each = var.kubernetes_cluster_nodes["workernodes"]
+
+  name                 = each.key
+  pve_node             = each.value.proxmox_node
+  ssh_key_location     = pathexpand(var.ssh_key_location)
   cpu                  = 4
-  memory               = 21000
+  memory               = 30000
   disk_size            = 150
-  ip                   = "10.0.1.120"
+  ip                   = each.value.ip
   default_gateway      = var.default_gateway
   subnet_mask          = var.subnet_mask
-  cloud_iso_name       = proxmox_virtual_environment_download_file.ubuntu_cloud_image["lab01"].id
-  user_name            = "homelab"
-  proxmox_endpoint     = var.proxmox_endpoint
-  proxmox_api_key      = data.azurerm_key_vault_secret.proxmox_api_key.value
-  proxmox_ssh_username = data.azurerm_key_vault_secret.proxmox_username.value
-  proxmox_ssh_password = data.azurerm_key_vault_secret.proxmox_password.value
-  additional_packages  = []
-  additional_runcmd    = local.base_runcmd
-}
-
-
-module "worker-node-02" {
-  source = "./modules/pve-ubuntu-vm"
-
-  name                 = "worker-node-2"
-  pve_node             = "lab02"
-  ssh_key_location     = pathexpand("~/.ssh/homelab.pub")
-  cpu                  = 4
-  memory               = 21000
-  disk_size            = 150
-  ip                   = "10.0.1.121"
-  default_gateway      = var.default_gateway
-  subnet_mask          = var.subnet_mask
-  cloud_iso_name       = proxmox_virtual_environment_download_file.ubuntu_cloud_image["lab02"].id
-  user_name            = "homelab"
+  cloud_iso_name       = proxmox_virtual_environment_download_file.ubuntu_cloud_image[each.value.proxmox_node].id
+  user_name            = var.vm_username
   proxmox_endpoint     = var.proxmox_endpoint
   proxmox_api_key      = data.azurerm_key_vault_secret.proxmox_api_key.value
   proxmox_ssh_username = data.azurerm_key_vault_secret.proxmox_username.value

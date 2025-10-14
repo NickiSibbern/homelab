@@ -12,14 +12,6 @@ terraform {
       source  = "hashicorp/azurerm"
       version = ">= 4.0.0"
     }
-    time = {
-      source  = "hashicorp/time"
-      version = ">= 0.10.0"
-    }
-    null = {
-      source  = "hashicorp/null"
-      version = ">= 3.0.0"
-    }
     kubectl = {
       source  = "gavinbunney/kubectl"
       version = ">= 1.19.0"
@@ -27,8 +19,8 @@ terraform {
   }
 
   backend "azurerm" {
-    resource_group_name  = "homelab"
-    storage_account_name = "sahomelabnickisibbern"
+    resource_group_name  = var.azure_resource_group_name
+    storage_account_name = var.azure_storage_account_name
     container_name       = "tfstate"
     key                  = "cluster-terraform.tfstate"
   }

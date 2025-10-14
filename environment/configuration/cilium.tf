@@ -8,6 +8,12 @@ locals {
     "https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.2.0/config/crd/standard/gateway.networking.k8s.io_grpcroutes.yaml",
     "https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.2.0/config/crd/experimental/gateway.networking.k8s.io_tlsroutes.yaml"
   ]
+
+  cidr_block = var.cilium_cidr_block
+
+  cilium_values = templatefile("./components/cilium/cilium-values.yaml", {
+    kubernetes_hostname = var.kubernetes_hostname
+  })
 }
 
 data "http" "crd_yaml" {
@@ -33,7 +39,7 @@ resource "helm_release" "cilium" {
   wait             = true
   wait_for_jobs    = true
   timeout          = 200
-  values           = [file("./components/cilium/cilium-values.yaml")]
+  values           = [local.cilium_values]
 }
 
 resource "kubectl_manifest" "CiliumL2AnnouncementPolicy" {
@@ -45,5 +51,7 @@ resource "kubectl_manifest" "CiliumL2AnnouncementPolicy" {
 resource "kubectl_manifest" "CiliumLoadBalancerIPPool" {
   depends_on = [ helm_release.cilium ]
 
-  yaml_body = templatefile("./components/cilium/cilium-lb-pool.yaml", {})
+  yaml_body = templatefile("./components/cilium/cilium-lb-pool.yaml", {
+    cidr_block = local.cidr_block
+  })
 }

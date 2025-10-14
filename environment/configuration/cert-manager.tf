@@ -30,5 +30,6 @@ resource "kubectl_manifest" "issuer" {
   yaml_body = templatefile("./components/cert-manager/cert-manager-issuer-manifest.yaml",
   {
     email = data.azurerm_key_vault_secret.email.value
+    domain = var.domain
   })
 }
