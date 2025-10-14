@@ -1,5 +1,9 @@
 # Homelab cluster
 
+This is an experimental playground, do not use for production.
+
+I created this repo in order to play around with kubeadm and various forms of managing a kubernetes cluster, it also serves as my local homelab where i run various applications.
+
 ## Requirements
 
 - ubuntu 24.04 servers with ssh access already setup
