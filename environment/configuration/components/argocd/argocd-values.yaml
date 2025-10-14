@@ -1,0 +1,33 @@
+global:
+  domain: argocd.nickisibbern.dk
+
+server:
+  httproute:
+    enabled: true
+    parentRefs:
+      - name: main-gateway
+        namespace: default
+        sectionName: https
+    hostnames:
+      - argocd.nickisibbern.dk
+    rules:
+      - matches:
+        - path:
+            type: PathPrefix
+            value: /
+        backendRefs:
+          - name: argocd-server
+            port: 80
+
+configs:
+  secret:
+    argocdServerAdminPassword: "${argocd_admin_password_hash}"
+    # githubSecret: "${github_token}"
+  params:
+    server.insecure: "true"
+  credentialTemplates:
+    https-creds:
+      url: "https://github.com/nickisibbern"
+      username: "x-user"
+      password: "${github_token}"
+

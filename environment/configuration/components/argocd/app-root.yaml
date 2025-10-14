@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: app-root
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    name: "in-cluster"
+    namespace: argocd
+  project: default
+  source:
+    path: application-manifests
+    repoURL: https://github.com/nickisibbern/homelab-state
+    targetRevision: main
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

@@ -7,6 +7,13 @@
 - direnv
 - az cli
 
+## notes
+When creating secret files for eg. the keyvault, in order to not accedently commit them you but still want the file tracked as code is depending on it, do the following:
+``` sh
+git update-index --assume-unchanged <path-to-file>
+```
+
+
 ## Prepare terraform
 
 1) make sure you are authorized with the azure cli, and set the `ARM_SUBSCRIPTION_ID` and `ARM_TENANT_ID` as variables in `.envc.rc` file
@@ -19,9 +26,13 @@ terraform init && terraform apply
 3) go to [./infrastructure/init/keyvault/](./infrastructure/init/keyvault/) and create a `secrets.json` which is a json of all the secrets that should be injected into the keyvault
 ``` json
 {
-    "proxmox-username": "",
-    "proxmox-password": "",
-    "proxmox-api-key": "",
+  "cloudflare-api-key": ",
+  "email": "",
+  "proxmox-api-key": "",
+  "proxmox-password": "",
+  "proxmox-username": "",
+  "argo-github-token": "",
+  "argocd-password": ""
 }
 ```
 then execute:

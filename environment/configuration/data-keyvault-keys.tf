@@ -16,3 +16,13 @@ data "azurerm_key_vault_secret" "email" {
   name         = "email"
   key_vault_id = data.azurerm_key_vault.homelab.id
 }
+
+data "azurerm_key_vault_secret" "argo_github_token" {
+  name         = "argo-github-token"
+  key_vault_id = data.azurerm_key_vault.homelab.id
+}
+
+data "azurerm_key_vault_secret" "argocd_password" {
+  name         = "argocd-password"
+  key_vault_id = data.azurerm_key_vault.homelab.id
+}
