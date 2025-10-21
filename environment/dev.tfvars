@@ -41,6 +41,10 @@ kubernetes_cluster_nodes = {
     "worker-node-02" : {
       "ip" : "10.0.1.121",
       "proxmox_node" : "lab02"
+    },
+    "worker-node-03" : {
+      "ip" : "10.0.1.122",
+      "proxmox_node" : "lab02"
     }
   }
 }
