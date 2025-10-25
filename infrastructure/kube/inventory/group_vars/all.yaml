@@ -1,6 +1,0 @@
----
-# Kubernetes
-control_plane_endpoint: "kube.nickisibbern.dk"
-control_plane_endpoint_port: 6443
-pod_cidr_range: 172.16.0.0/16
-cni_cidr_range: 10.96.0.0/12

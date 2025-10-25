@@ -1,0 +1,15 @@
+machine:
+  type: controlplane
+  install:
+    disk: /dev/vda
+    image: ${custom_install_image}
+
+---
+apiVersion: v1alpha1
+kind: UserVolumeConfig
+name: longhorn
+provisioning:
+  diskSelector:
+    match: disk.transport == "nvme"
+  grow: false
+  maxSize: 150GB
