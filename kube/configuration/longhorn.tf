@@ -36,3 +36,12 @@ resource "kubectl_manifest" "longhorn_http_route" {
 
   yaml_body = templatefile("${path.module}/manifest/longhorn/longhorn-http-route.yaml", {})
 }
+
+resource "kubectl_manifest" "longhorn_backup_user_secret" {
+  depends_on = [helm_release.longhorn]
+
+  yaml_body = templatefile("${path.module}/manifest/longhorn/longhorn-backup-user-secret.yaml", {
+    username = data.azurerm_key_vault_secret.longhorn_backup_username.value
+    password = data.azurerm_key_vault_secret.longhorn_backup_password.value
+  })
+}

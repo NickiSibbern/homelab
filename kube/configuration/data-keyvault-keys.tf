@@ -26,3 +26,13 @@ data "azurerm_key_vault_secret" "argocd_password" {
   name         = "argocd-password"
   key_vault_id = data.azurerm_key_vault.homelab.id
 }
+
+data "azurerm_key_vault_secret" "longhorn_backup_username" {
+  name         = "longhorn-backup-user"
+  key_vault_id = data.azurerm_key_vault.homelab.id
+}
+
+data "azurerm_key_vault_secret" "longhorn_backup_password" {
+  name         = "longhorn-backup-user-password"
+  key_vault_id = data.azurerm_key_vault.homelab.id
+}
