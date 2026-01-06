@@ -33,7 +33,7 @@ kubernetes_config = {
   }
 
   talos = {
-    version = "v1.11.5" # Talos version to use for the kubernetes cluster
+    version = "v1.12.1" # Talos version to use for the kubernetes cluster
   }
 
   nodes = {
