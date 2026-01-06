@@ -176,7 +176,6 @@ resource "null_resource" "wait_for_cluster" {
 
   provisioner "local-exec" {
     command = <<-EOT
-      # Wait for the Kubernetes API server to be fully ready
       timeout=600
       while [ $timeout -gt 0 ]; do
         if kubectl cluster-info >/dev/null 2>&1 && \
