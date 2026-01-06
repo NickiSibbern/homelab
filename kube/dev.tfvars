@@ -6,7 +6,7 @@ subnet_mask     = "22"
 # proxmox / ansible
 proxmox_config = {
   "endpoint" : "https://10.0.1.1:8006",
-  "nodes" : ["lab01", "lab02"]
+  "nodes" : [ "lab01" ]
 }
 
 # azure
@@ -43,7 +43,7 @@ kubernetes_config = {
       role      = "controlplane"
       pve_node  = "lab01"
       cpu       = 2
-      memory    = 8192
+      memory    = 6144
       disk_size = 20
     }
     worker1 = {
@@ -51,26 +51,17 @@ kubernetes_config = {
       ip        = "10.0.1.120"
       role      = "worker"
       pve_node  = "lab01"
-      cpu       = 2
-      memory    = 15000
+      cpu       = 6
+      memory    = 8192
       disk_size = 50
     }
     worker2 = {
       name = "worker-node-02"
       ip       = "10.0.1.121"
       role     = "worker"
-      pve_node = "lab02"
-      cpu     = 2
-      memory  = 15000
-      disk_size = 50
-    }
-    worker3 = {
-      name = "worker-node-03"
-      ip       = "10.0.1.122"
-      role     = "worker"
-      pve_node = "lab02"
-      cpu     = 2
-      memory  = 15000
+      pve_node = "lab01"
+      cpu     = 6
+      memory  = 8192
       disk_size = 50
     }
   }
