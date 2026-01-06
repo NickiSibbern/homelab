@@ -42,6 +42,7 @@ variable "kubernetes_config" {
     argo = object({
       github_organization = string
       state_repo          = string
+      version             = string
     })
     talos = object({
       version = string

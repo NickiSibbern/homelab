@@ -34,6 +34,7 @@ kubernetes_config = {
   argo = {
     github_organization = "nickisibbern" # GitHub organization for ArgoCD to sync from
     state_repo = "https://github.com/nickisibbern/homelab-state" # should be in the same org as github_organization, access is only granted to that org via credentialTemplates in argocd-values.yaml
+    version = "8.6.1"
   }
 
   talos = {

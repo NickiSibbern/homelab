@@ -20,7 +20,7 @@ resource "helm_release" "argocd" {
   chart            = "argo-cd"
   namespace        = kubernetes_namespace.argo.metadata[0].name
   create_namespace = false
-  version          = "8.6.1"
+  version          = var.kubernetes_config.argo.version
   cleanup_on_fail  = true
   wait             = true
   wait_for_jobs    = true
