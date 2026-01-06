@@ -32,6 +32,9 @@ variable "kubernetes_config" {
     cluster_name = string
     hostname     = string
     endpoint     = string
+    certManager = object({
+     version = string
+    })
     cilium = object({
       version = string
       cidr_block = string

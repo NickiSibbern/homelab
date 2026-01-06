@@ -5,7 +5,7 @@ resource "helm_release" "cert-manager" {
   chart            = "cert-manager"
   namespace        = "cert-manager"
   create_namespace = true
-  version          = "1.19.0"
+  version          = var.kubernetes_config.certManager.version
   cleanup_on_fail  = true
   wait             = true
   wait_for_jobs    = true
