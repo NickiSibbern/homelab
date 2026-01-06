@@ -30,10 +30,10 @@ resource "proxmox_virtual_environment_vm" "vm" {
   }
 
   initialization {
+
     ip_config {
       ipv4 {
-        address = "${var.ip}/${var.subnet_mask}"
-        gateway = var.default_gateway
+        address = "dhcp"
       }
     }
   }

@@ -36,18 +36,3 @@ variable "disk_size" {
   type        = number
   default     = 50
 }
-
-variable "ip" {
-  description = "IP address for the VM"
-  type        = string
-}
-
-variable "default_gateway" {
-  description = "Default gateway for the VM"
-  type        = string
-}
-
-variable "subnet_mask" {
-  description = "Subnet mask for the VM"
-  type        = string
-}

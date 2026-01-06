@@ -1,8 +1,4 @@
 locals {
-  bootstrap_controleplane_ip = values({
-    for key, value in var.kubernetes_config.nodes : key => value.ip if value.role == "controlplane"
-  })[0] # Get IP of the first control plane node
-
   cilium_crds = [
     "https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.2.0/config/crd/standard/gateway.networking.k8s.io_gatewayclasses.yaml",
     "https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.2.0/config/crd/standard/gateway.networking.k8s.io_gateways.yaml",
@@ -11,10 +7,6 @@ locals {
     "https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.2.0/config/crd/standard/gateway.networking.k8s.io_grpcroutes.yaml",
     "https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.2.0/config/crd/experimental/gateway.networking.k8s.io_tlsroutes.yaml"
   ]
-
-  cilium_values = templatefile("${path.module}/manifests/cilium/cilium-values.yaml", {
-    cluster_endpoint = var.kubernetes_config.hostname
-  })
 }
 
 data "http" "crd_yaml" {
@@ -54,9 +46,6 @@ module "control-planes" {
   cpu             = each.value.cpu
   memory          = each.value.memory
   disk_size       = each.value.disk_size
-  ip              = each.value.ip
-  default_gateway = var.default_gateway
-  subnet_mask     = var.subnet_mask
   cloud_iso_name  = proxmox_virtual_environment_download_file.talos_nocloud_image[each.value.pve_node].id
   tags            = [each.value.role, "terraform", "kubernetes", "talos"]
 }
@@ -71,14 +60,23 @@ module "workers" {
   cpu             = each.value.cpu
   memory          = each.value.memory
   disk_size       = each.value.disk_size
-  ip              = each.value.ip
-  default_gateway = var.default_gateway
-  subnet_mask     = var.subnet_mask
   cloud_iso_name  = proxmox_virtual_environment_download_file.talos_nocloud_image[each.value.pve_node].id
   tags            = [each.value.role, "terraform", "kubernetes", "talos"]
 }
 
 resource "talos_machine_secrets" "this" {}
+
+locals {
+  bootstrap_controleplane_ip = one([
+    for key, value in module.control-planes : value.ipv4
+  ])
+
+  cluster_endpoint = "https://${local.bootstrap_controleplane_ip}:6443"
+
+  cilium_values = templatefile("${path.module}/manifests/cilium/cilium-values.yaml", {
+    cluster_endpoint = local.bootstrap_controleplane_ip
+  })
+}
 
 module "control-planes-talos-config" {
   depends_on = [module.control-planes]
@@ -88,8 +86,8 @@ module "control-planes-talos-config" {
 
   cluster_name     = var.kubernetes_config.cluster_name
   machine_type     = each.value.role
-  cluster_endpoint = var.kubernetes_config.endpoint
-  machine_ip       = each.value.ip
+  cluster_endpoint = local.cluster_endpoint
+  machine_ip       = module.control-planes[each.key].ipv4
   machine_secrets  = talos_machine_secrets.this
   config_patches = [
     templatefile("${path.module}/talos/machineConfigs/common.yaml", {
@@ -118,8 +116,8 @@ module "worker-nodes-talos-config" {
 
   cluster_name     = var.kubernetes_config.cluster_name
   machine_type     = each.value.role
-  cluster_endpoint = var.kubernetes_config.endpoint
-  machine_ip       = each.value.ip
+  cluster_endpoint = local.cluster_endpoint
+  machine_ip       = module.workers[each.key].ipv4
   machine_secrets  = talos_machine_secrets.this
   config_patches = [
     templatefile("${path.module}/talos/machineConfigs/common.yaml", {
@@ -129,6 +127,8 @@ module "worker-nodes-talos-config" {
     })
   ]
 }
+
+
 
 resource "null_resource" "wait_for_vm" {
   depends_on = [module.control-planes, module.control-planes-talos-config]
@@ -151,6 +151,7 @@ resource "talos_cluster_kubeconfig" "this" {
   ]
   client_configuration = talos_machine_secrets.this.client_configuration
   node                 = local.bootstrap_controleplane_ip
+  endpoint             = local.bootstrap_controleplane_ip
 }
 
 resource "local_file" "kubeconfig" {

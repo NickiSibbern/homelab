@@ -44,7 +44,6 @@ kubernetes_config = {
   nodes = {
     controlplane1 = {
       name      = "control-plane-01"
-      ip        = "10.0.1.110"
       role      = "controlplane"
       pve_node  = "lab01"
       cpu       = 2
@@ -53,7 +52,6 @@ kubernetes_config = {
     }
     worker1 = {
       name      = "worker-node-01"
-      ip        = "10.0.1.120"
       role      = "worker"
       pve_node  = "lab01"
       cpu       = 6
@@ -62,7 +60,6 @@ kubernetes_config = {
     }
     worker2 = {
       name = "worker-node-02"
-      ip       = "10.0.1.121"
       role     = "worker"
       pve_node = "lab01"
       cpu     = 6

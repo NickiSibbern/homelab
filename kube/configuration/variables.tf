@@ -35,7 +35,6 @@ variable "kubernetes_config" {
     })
     nodes = map(object({
       name      = string
-      ip        = string
       role      = string
       pve_node  = string
       cpu       = number
