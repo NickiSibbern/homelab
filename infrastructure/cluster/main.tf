@@ -209,7 +209,7 @@ resource "helm_release" "cilium" {
   repository       = "https://helm.cilium.io/"
   chart            = "cilium"
   namespace        = "kube-system"
-  version          = "1.18.2"
+  version          = var.kubernetes_config.cilium.version
   cleanup_on_fail  = true
   wait             = true
   wait_for_jobs    = true

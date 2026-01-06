@@ -23,6 +23,7 @@ kubernetes_config = {
   endpoint     = "https://kube.nickisibbern.dk:6443" # domain for the kubernetes api endpoint
 
   cilium = {
+    version = "1.18.5"
     cidr_block = "10.0.2.0/24" # CIDR block for Cilium LoadBalancerIPPool, this is used for services of type LoadBalancer where an external IP is needed
   }
 

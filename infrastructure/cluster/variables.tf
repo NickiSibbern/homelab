@@ -33,6 +33,7 @@ variable "kubernetes_config" {
     hostname     = string
     endpoint     = string
     cilium = object({
+      version = string
       cidr_block = string
     })
     argo = object({
