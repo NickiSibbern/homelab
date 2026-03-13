@@ -36,3 +36,18 @@ variable "disk_size" {
   type        = number
   default     = 50
 }
+
+variable "ip_address" {
+  description = "Static IPv4 address for the VM"
+  type        = string
+}
+
+variable "default_gateway" {
+  description = "Default gateway for the VM"
+  type        = string
+}
+
+variable "subnet_mask" {
+  description = "CIDR subnet mask for the VM IPv4 address"
+  type        = string
+}

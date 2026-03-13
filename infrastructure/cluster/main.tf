@@ -43,6 +43,9 @@ module "control-planes" {
 
   name            = each.value.name
   pve_node        = each.value.pve_node
+  ip_address      = each.value.ip_address
+  default_gateway = var.default_gateway
+  subnet_mask     = var.subnet_mask
   cpu             = each.value.cpu
   memory          = each.value.memory
   disk_size       = each.value.disk_size
@@ -57,6 +60,9 @@ module "workers" {
 
   name            = each.value.name
   pve_node        = each.value.pve_node
+  ip_address      = each.value.ip_address
+  default_gateway = var.default_gateway
+  subnet_mask     = var.subnet_mask
   cpu             = each.value.cpu
   memory          = each.value.memory
   disk_size       = each.value.disk_size
@@ -90,6 +96,25 @@ module "control-planes-talos-config" {
   machine_ip       = module.control-planes[each.key].ipv4
   machine_secrets  = talos_machine_secrets.this
   config_patches = [
+    yamlencode({
+      machine = {
+        network = {
+          interfaces = [
+            {
+              interface = each.value.network_interface
+              dhcp      = false
+              addresses = ["${each.value.ip_address}/${var.subnet_mask}"]
+              routes = [
+                {
+                  network = "0.0.0.0/0"
+                  gateway = var.default_gateway
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }),
     templatefile("${path.module}/talos/machineConfigs/common.yaml", {
     }),
     templatefile("${path.module}/talos/machineConfigs/control-plane.yaml", {
@@ -120,6 +145,25 @@ module "worker-nodes-talos-config" {
   machine_ip       = module.workers[each.key].ipv4
   machine_secrets  = talos_machine_secrets.this
   config_patches = [
+    yamlencode({
+      machine = {
+        network = {
+          interfaces = [
+            {
+              interface = each.value.network_interface
+              dhcp      = false
+              addresses = ["${each.value.ip_address}/${var.subnet_mask}"]
+              routes = [
+                {
+                  network = "0.0.0.0/0"
+                  gateway = var.default_gateway
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }),
     templatefile("${path.module}/talos/machineConfigs/common.yaml", {
     }),
     templatefile("${path.module}/talos/machineConfigs/worker-node.yaml", {
@@ -130,16 +174,13 @@ module "worker-nodes-talos-config" {
 
 
 
-resource "null_resource" "wait_for_vm" {
+resource "time_sleep" "wait_for_vm" {
   depends_on = [module.control-planes, module.control-planes-talos-config]
-
-  provisioner "local-exec" {
-    command = "sleep 120" # Wait for 2 minutes to allow the VM to boot up before bootstrapping Talos
-  }
+  create_duration = "120s"
 }
 
 resource "talos_machine_bootstrap" "bootstrap" {
-  depends_on = [module.control-planes-talos-config, null_resource.wait_for_vm]
+  depends_on = [module.control-planes-talos-config, time_sleep.wait_for_vm]
 
   client_configuration = talos_machine_secrets.this.client_configuration
   node                 = local.bootstrap_controleplane_ip
@@ -172,38 +213,13 @@ resource "local_file" "talos_client_configuration" {
   filename = pathexpand("~/.talos/config")
 }
 
-resource "null_resource" "wait_for_cluster" {
+resource "time_sleep" "wait_for_cluster" {
   depends_on = [talos_machine_bootstrap.bootstrap, talos_cluster_kubeconfig.this]
-
-  provisioner "local-exec" {
-    command = <<-EOT
-      timeout=600
-      while [ $timeout -gt 0 ]; do
-        if kubectl cluster-info >/dev/null 2>&1 && \
-           kubectl get nodes >/dev/null 2>&1 && \
-           kubectl get crd >/dev/null 2>&1 && \
-           kubectl api-versions | grep -q "apiextensions.k8s.io/v1" >/dev/null 2>&1; then
-          echo "Kubernetes API server is fully ready"
-          break
-        fi
-        echo "Waiting for Kubernetes API server to be fully ready... ($timeout seconds remaining)"
-        sleep 15
-        timeout=$((timeout-15))
-      done
-      if [ $timeout -le 0 ]; then
-        echo "Timeout waiting for Kubernetes API server to be ready"
-        exit 1
-      fi
-
-      # Additional wait for API server to be stable
-      echo "Waiting additional 30 seconds for API server stability..."
-      sleep 30
-    EOT
-  }
+  create_duration = "120s"
 }
 
 resource "helm_release" "cilium" {
-  depends_on = [null_resource.wait_for_cluster]
+  depends_on = [time_sleep.wait_for_cluster]
 
   name             = "cilium"
   repository       = "https://helm.cilium.io/"

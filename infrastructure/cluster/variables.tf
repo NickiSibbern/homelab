@@ -51,6 +51,8 @@ variable "kubernetes_config" {
       name      = string
       role      = string
       pve_node  = string
+      ip_address = string
+      network_interface = optional(string, "ens18")
       cpu       = number
       memory    = number
       disk_size = number
