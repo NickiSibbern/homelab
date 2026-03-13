@@ -23,11 +23,11 @@ kubernetes_config = {
   endpoint     = "https://kube.nickisibbern.dk:6443" # domain for the kubernetes api endpoint
 
   certManager = {
-    version = "1.19.0"
+    version = "1.20.0"
   }
 
   cilium = {
-    version = "1.18.5"
+    version = "1.19.1"
     cidr_block = "10.0.2.0/24" # CIDR block for Cilium LoadBalancerIPPool, this is used for services of type LoadBalancer where an external IP is needed
   }
 
@@ -38,7 +38,7 @@ kubernetes_config = {
   }
 
   talos = {
-    version = "v1.12.1" # Talos version to use for the kubernetes cluster
+    version = "v1.12.5" # Talos version to use for the kubernetes cluster
   }
 
   nodes = {
@@ -55,16 +55,16 @@ kubernetes_config = {
       role      = "worker"
       pve_node  = "lab01"
       cpu       = 6
-      memory    = 8192
-      disk_size = 50
+      memory    = 12288
+      disk_size = 150
     }
     worker2 = {
       name = "worker-node-02"
       role     = "worker"
       pve_node = "lab01"
       cpu     = 6
-      memory  = 8192
-      disk_size = 50
+      memory  = 12288
+      disk_size = 150
     }
   }
 }
