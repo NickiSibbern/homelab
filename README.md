@@ -1,4 +1,4 @@
-# Homelab cluster
+# Homelab Cluster
 
 ## Requirements
 - proxmox instance
@@ -8,17 +8,17 @@
 - taloscli
 - kubectl
 
-## Prepare opentofu
+## Prepare OpenTofu
 
-1. make sure you are authorized with the azure cli, and set the `ARM_SUBSCRIPTION_ID` and `ARM_TENANT_ID` as variables in `.envc.rc` file
-2. go to [./infrastructure/bootstrap/state/](./infrastructure/bootstrap/state/) and do
+1. Make sure you are authorized with the Azure CLI, and set `ARM_SUBSCRIPTION_ID` and `ARM_TENANT_ID` in `.envc.rc` or as env vars.
+2. Go to [./infrastructure/bootstrap/state/](./infrastructure/bootstrap/state/) and run:
 
 ```sh
 tofu init -var-file ../../../kube/dev.tfvars &&
 tofu apply -var-file ../../../kube/dev.tfvars
 ```
 
-3. go to [./infrastructure/bootstrap/keyvault/](./infrastructure/bootstrap/keyvault/) and create a `secrets.json` which is a json of all the secrets that should be injected into the keyvault
+3. Go to [./infrastructure/bootstrap/keyvault/](./infrastructure/bootstrap/keyvault/) and create a `secrets.json` file containing the secrets to inject into Key Vault.
 
 ```json
 {
@@ -27,31 +27,30 @@ tofu apply -var-file ../../../kube/dev.tfvars
   "proxmox-api-key": "",
   "proxmox-password": "",
   "proxmox-username": "",
-  "argo-github-token": "",
-  "argocd-password": ""
+  "flux-github-token": ""
 }
 ```
 
-then execute:
+Then run:
 
 ```sh
 tofu init -var-file ../../../kube/dev.tfvars &&
-tofu apply -var-file ../../../kube/dev.tfvar
+tofu apply -var-file ../../../kube/dev.tfvars
 ```
 
 ## Setup cluster
 
-to to [./infrastructure/cluster](./infrastructure/cluster/) and do:
+Go to [./infrastructure/cluster](./infrastructure/cluster/) and run:
 
 ```sh
-tofu init -var-file=../../../kube/dev.tfvars && opentofu apply -var-file=../../../kube/dev.tfvars
+tofu init -var-file=../../../kube/dev.tfvars && tofu apply -var-file=../../../kube/dev.tfvars
 ```
 
-this will setup the cluster as specified in the kubernetes_config variable
-It will also copy the kube config into your `~/.kube/` folder and talos config to your `~/.talos/`
+This sets up the cluster as specified in `kubernetes_config`.
+It also copies the kubeconfig into `~/.kube/` and the Talos config into `~/.talos/`.
 
 ## Cluster configuration
 
-all cluster configuration is done in the [./kube/configuration](./kube/configuration/) managed by terraform
+All cluster configuration is managed by Terraform in [./kube/configuration](./kube/configuration/).
 
-> use the vars file in the kube folder
+> Use the vars file in the `kube` folder.

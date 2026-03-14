@@ -17,12 +17,7 @@ data "azurerm_key_vault_secret" "email" {
   key_vault_id = data.azurerm_key_vault.homelab.id
 }
 
-data "azurerm_key_vault_secret" "argo_github_token" {
-  name         = "argo-github-token"
-  key_vault_id = data.azurerm_key_vault.homelab.id
-}
-
-data "azurerm_key_vault_secret" "argocd_password" {
-  name         = "argocd-password"
+data "azurerm_key_vault_secret" "flux_github_token" {
+  name         = "flux-github-token"
   key_vault_id = data.azurerm_key_vault.homelab.id
 }

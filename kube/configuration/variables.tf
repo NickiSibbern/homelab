@@ -3,6 +3,12 @@ variable "domain" {
   type        = string
 }
 
+variable "flux_github_token" {
+  description = "GitHub token for Flux to read/write the state repo. Pass via TF_VAR_flux_github_token."
+  type        = string
+  sensitive   = true
+}
+
 variable "azure_config" {
   description = "Azure configuration map"
   type = object({
@@ -23,12 +29,12 @@ variable "kubernetes_config" {
      version = string
     })
     cilium = object({
+      version    = optional(string)
       cidr_block = string
     })
-    argo = object({
-      github_organization = string
-      state_repo          = string
-      version             = string
+    flux = object({
+      state_repo = string
+      version    = string
     })
     talos = object({
       version = string

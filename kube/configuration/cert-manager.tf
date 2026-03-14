@@ -13,7 +13,7 @@ resource "helm_release" "cert-manager" {
   values           = [file("${path.module}/manifest/cert-manager/cert-manager-values.yaml")]
 }
 
-resource "kubernetes_secret" "cloudflare_api_token_secret" {
+resource "kubernetes_secret_v1" "cloudflare_api_token_secret" {
   metadata {
     name      = "cloudflare-api-token"
     namespace = "cert-manager"

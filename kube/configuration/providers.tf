@@ -16,6 +16,10 @@ terraform {
       source  = "gavinbunney/kubectl"
       version = ">= 1.19.0"
     }
+    flux = {
+      source  = "fluxcd/flux"
+      version = ">= 1.3.0"
+    }
   }
 
   backend "azurerm" {
@@ -38,4 +42,18 @@ provider "helm" {
 
 provider "azurerm" {
   features {}
+}
+
+provider "flux" {
+  kubernetes = {
+    config_path = "~/.kube/config"
+  }
+  git = {
+    url    = endswith(var.kubernetes_config.flux.state_repo, ".git") ? var.kubernetes_config.flux.state_repo : "${var.kubernetes_config.flux.state_repo}.git"
+    branch = "main"
+    http = {
+      username = "x-user"
+      password  = var.flux_github_token
+    }
+  }
 }

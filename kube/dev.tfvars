@@ -31,10 +31,9 @@ kubernetes_config = {
     cidr_block = "10.0.2.0/24" # CIDR block for Cilium LoadBalancerIPPool, this is used for services of type LoadBalancer where an external IP is needed
   }
 
-  argo = {
-    github_organization = "nickisibbern" # GitHub organization for ArgoCD to sync from
-    state_repo = "https://github.com/nickisibbern/homelab-state" # should be in the same org as github_organization, access is only granted to that org via credentialTemplates in argocd-values.yaml
-    version = "8.6.1"
+  flux = {
+    state_repo = "https://github.com/nickisibbern/homelab-state"
+    version    = "v2.8.2" # https://github.com/fluxcd/flux2/releases
   }
 
   talos = {

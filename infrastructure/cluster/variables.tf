@@ -39,10 +39,9 @@ variable "kubernetes_config" {
       version = string
       cidr_block = string
     })
-    argo = object({
-      github_organization = string
-      state_repo          = string
-      version             = string
+    flux = object({
+      state_repo = string
+      version    = string
     })
     talos = object({
       version = string
